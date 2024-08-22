@@ -27,6 +27,7 @@ jobs:
     environment: ${{ github.event.inputs.flavor }}
     outputs:
       prev: ${{ steps.print.outputs.version }}
+      namespace: ${{ steps.print.outputs.namespace }}
     steps:
       - uses: actions/checkout@v4
       - name: Auth to Cluster
@@ -59,6 +60,7 @@ jobs:
 
           echo "Previous version: $prev_version"
           echo "version=$prev_version" >> $GITHUB_OUTPUT
+          echo "namesapce=$namespace" >> $GITHUB_OUTPUT
 
   # build-server-image:
   #   name: Build Server Image
@@ -246,6 +248,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          extra-flags: 'workspaces focus @affine/changelog'
+          electron-install: false
       - name: Output deployed info
         if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
         id: set_info
@@ -259,48 +266,17 @@ jobs:
           else
             exit 1
           fi
-          npx changelogithub --from ${{ needs.output-prev-version.outputs.prev }} --to ${{ github.sha }} --output .server-changelog.md
-          {
-            echo 'changelog<<EOF'
-            sed ':a;N;$!ba;s/\n/\\n/g' .server-changelog.md
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Post Success event to a Slack channel
-        id: success-slack
-        uses: slackapi/slack-github-action@v1.26.0
         if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
-        with:
-          channel-id: ${{ secrets.RELEASE_SLACK_CHNNEL_ID }}
-          payload: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "text": "Server deployed: ${{ steps.set_info.outputs.deployed_url }}",
-                    "type": "mrkdwn"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "text": "*Changelog*",
-                    "type": "mrkdwn"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "text": "${{ steps.set_info.outputs.changelog }}",
-                    "type": "mrkdwn"
-                  }
-                }
-              ]
-            }
+        run: node ./tools/changelog/index.js
         env:
+          CHANNEL_ID: ${{ secrets.RELEASE_SLACK_CHNNEL_ID }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          DEPLOYED_URL: ${{ steps.set_info.outputs.deployed_url }}
+          PREV_VERSION: ${{ needs.output-prev-version.outputs.prev }}
+          NAMESPACE: ${{ needs.output-prev-version.outputs.namespace }}
       - name: Post Failed event to a Slack channel
         id: failed-slack
         uses: slackapi/slack-github-action@v1.26.0
