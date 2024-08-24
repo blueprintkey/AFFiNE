@@ -12,7 +12,7 @@ RUN git clone https://github.com/blueprintkey/AFFiNE.git .
 RUN git checkout stable
 
 # Step 5: Install application dependencies
-RUN npm install
+RUN npm install --force
 
 # Step 6: Build the application
 RUN npm run build
