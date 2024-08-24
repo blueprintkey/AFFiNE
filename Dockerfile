@@ -11,11 +11,13 @@ RUN apk add --no-cache git python3 make g++ curl
 RUN git clone https://github.com/blueprintkey/AFFiNE.git .
 RUN git checkout stable
 
-# Step 5: Remove any existing node_modules to avoid conflicts
-RUN rm -rf node_modules
+# Step 5: Remove any existing node_modules and package-lock.json to avoid conflicts
+RUN rm -rf node_modules package-lock.json
 
-# Step 6: Install application dependencies using npm install
-RUN npm install --legacy-peer-deps
+# Step 6: Modify package.json to update vitest and resolve dependency conflicts
+RUN sed -i 's/"vitest": "1.4.0"/"vitest": "^2.0.0"/' package.json && \
+    sed -i 's/"vitest-mock-extended": "^1.3.1"/"vitest-mock-extended": "^1.3.2"/' package.json && \
+    npm install --legacy-peer-deps
 
 # Step 7: Build the application
 RUN npm run build
