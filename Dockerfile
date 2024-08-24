@@ -11,11 +11,11 @@ RUN apk add --no-cache git python3 make g++ curl
 RUN git clone https://github.com/blueprintkey/AFFiNE.git .
 RUN git checkout stable
 
-# Step 5: Remove any existing node_modules and package-lock.json to avoid conflicts
-RUN rm -rf node_modules package-lock.json
+# Step 5: Remove any existing node_modules to avoid conflicts
+RUN rm -rf node_modules
 
-# Step 6: Install application dependencies using npm ci to ensure clean install
-RUN npm ci --legacy-peer-deps
+# Step 6: Install application dependencies using npm install
+RUN npm install --legacy-peer-deps
 
 # Step 7: Build the application
 RUN npm run build
