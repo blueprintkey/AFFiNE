@@ -14,31 +14,34 @@ RUN git checkout stable
 # Step 5: Remove any existing node_modules and package-lock.json to avoid conflicts
 RUN rm -rf node_modules package-lock.json
 
-# Step 6: Modify package.json to update vitest and resolve dependency conflicts
-RUN sed -i 's/"vitest": "1.4.0"/"vitest": "^2.0.0"/' package.json && \
-    sed -i 's/"vitest-mock-extended": "^1.3.1"/"vitest-mock-extended": "^1.3.2"/' package.json && \
-    npm install --legacy-peer-deps
+# Step 6: Modify package.json to remove workspace protocol and update dependencies
+RUN sed -i 's/"workspace:\*"/"1.0.0"/g' package.json && \
+    sed -i 's/"vitest": "1.4.0"/"vitest": "^2.0.0"/' package.json && \
+    sed -i 's/"vitest-mock-extended": "^1.3.1"/"vitest-mock-extended": "^1.3.2"/' package.json
 
-# Step 7: Build the application
+# Step 7: Install application dependencies
+RUN npm install --legacy-peer-deps
+
+# Step 8: Build the application
 RUN npm run build
 
-# Step 8: Final stage to run the application
+# Step 9: Final stage to run the application
 FROM node:18-alpine as final
 
-# Step 9: Set the working directory
+# Step 10: Set the working directory
 WORKDIR /app
 
-# Step 10: Copy the built application from the base stage
+# Step 11: Copy the built application from the base stage
 COPY --from=base /app /app
 
-# Step 11: Expose necessary ports
+# Step 12: Expose necessary ports
 EXPOSE 3010
 EXPOSE 5555
 
-# Step 12: Set environment variables
+# Step 13: Set environment variables
 ENV NODE_ENV=production
 ENV DATABASE_URL=postgres://affine:affine@postgres:5432/affine
 ENV REDIS_SERVER_HOST=redis
 
-# Step 13: Command to run the application
+# Step 14: Command to run the application
 CMD ["sh", "-c", "node ./scripts/self-host-predeploy && node ./dist/index.js"]
