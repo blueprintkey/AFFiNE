@@ -15,9 +15,9 @@ RUN git checkout stable
 RUN rm -rf node_modules package-lock.json
 
 # Step 6: Modify package.json to remove workspace protocol and update dependencies
-RUN sed -i 's/"workspace:\*"/"1.0.0"/g' package.json && \
-    sed -i 's/"vitest": "1.4.0"/"vitest": "^2.0.0"/' package.json && \
-    sed -i 's/"vitest-mock-extended": "^1.3.1"/"vitest-mock-extended": "^1.3.2"/' package.json
+# RUN sed -i 's/"workspace:\*"/"1.0.0"/g' package.json && \
+  #  sed -i 's/"vitest": "1.4.0"/"vitest": "^2.0.0"/' package.json && \
+   # sed -i 's/"vitest-mock-extended": "^1.3.1"/"vitest-mock-extended": "^1.3.2"/' package.json
 
 # Step 7: Install application dependencies
 RUN npm install --legacy-peer-deps
