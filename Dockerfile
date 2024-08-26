@@ -1,4 +1,4 @@
-# Step 1: Base image for building the application
+# Step 1: Use a smaller base image for building the application
 FROM node:18-alpine as build
 
 # Step 2: Set the working directory
@@ -11,13 +11,16 @@ RUN apk add --no-cache git python3 make g++ curl
 RUN git clone https://github.com/blueprintkey/AFFiNE.git .
 RUN git checkout stable
 
-# Step 5: Copy the yarn.lock file to ensure it's used in the build
-COPY yarn.lock ./
+# Step 5: Copy the package.json and yarn.lock files
+COPY package.json yarn.lock ./
 
-# Step 6: Install application dependencies using Yarn with the updated flags
-RUN yarn install --network-timeout 100000
+# Step 6: Install application dependencies using Yarn with network timeout and cleaning up afterwards
+RUN yarn install --network-timeout 100000 && \
+    yarn cache clean && \
+    rm -rf /tmp/* /var/tmp/* /usr/share/man /var/cache/apk/*
 
-# Step 7: Build the application
+# Step 7: Set the BUILD_TYPE environment variable and build the application
+ENV BUILD_TYPE=stable
 RUN yarn build
 
 # Step 8: Create a minimal production image
@@ -29,9 +32,10 @@ WORKDIR /app
 # Step 10: Copy the built application from the build stage
 COPY --from=build /app /app
 
-# Step 11: Install production dependencies only
-RUN yarn install --production --immutable --immutable-cache --network-timeout 100000 && \
-    yarn cache clean
+# Step 11: Install production dependencies only and clean up
+RUN yarn install --production --network-timeout 100000 && \
+    yarn cache clean && \
+    rm -rf /tmp/* /var/tmp/* /usr/share/man /var/cache/apk/*
 
 # Step 12: Expose necessary ports
 EXPOSE 3010
