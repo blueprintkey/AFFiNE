@@ -14,43 +14,40 @@ RUN git checkout stable
 # Step 5: Remove any existing node_modules and yarn.lock to avoid conflicts
 RUN rm -rf node_modules yarn.lock
 
-# Step 6: Install Yarn globally
-RUN npm install -g yarn
-
-# Step 7: Install application dependencies using Yarn with caching
+# Step 6: Install application dependencies using Yarn with caching
 RUN yarn install --frozen-lockfile --network-timeout 100000
 
-# Step 8: Build the application
+# Step 7: Build the application
 RUN yarn build
 
-# Step 9: Create a minimal production image
+# Step 8: Create a minimal production image
 FROM node:18-alpine as production
 
-# Step 10: Set the working directory
+# Step 9: Set the working directory
 WORKDIR /app
 
-# Step 11: Copy the built application from the build stage
+# Step 10: Copy the built application from the build stage
 COPY --from=build /app /app
 
-# Step 12: Install production dependencies only
+# Step 11: Install production dependencies only
 RUN yarn install --production --frozen-lockfile --network-timeout 100000 && \
     yarn cache clean
 
-# Step 13: Expose necessary ports
+# Step 12: Expose necessary ports
 EXPOSE 3010
 EXPOSE 5555
 
-# Step 14: Set environment variables
+# Step 13: Set environment variables
 ENV NODE_ENV=production
 ENV DATABASE_URL=postgres://affine:affine@postgres:5432/affine
 ENV REDIS_SERVER_HOST=redis
 
-# Step 15: Add a health check (optional, customize as needed)
+# Step 14: Add a health check (optional, customize as needed)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3010/health || exit 1
 
-# Step 16: Set the user to run the application
+# Step 15: Set the user to run the application
 USER node
 
-# Step 17: Command to run the application
+# Step 16: Command to run the application
 CMD ["sh", "-c", "node ./scripts/self-host-predeploy && node ./dist/index.js"]
