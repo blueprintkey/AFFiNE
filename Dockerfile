@@ -32,8 +32,8 @@ WORKDIR /app
 # Step 10: Copy the built application from the build stage
 COPY --from=build /app /app
 
-# Step 11: Install production dependencies only and clean up
-RUN yarn install --production --network-timeout 100000 && \
+# Step 11: Install production dependencies using Yarn Workspaces Focus and clean up
+RUN yarn workspaces focus --production --all && \
     yarn cache clean && \
     rm -rf /tmp/* /var/tmp/* /usr/share/man /var/cache/apk/*
 
