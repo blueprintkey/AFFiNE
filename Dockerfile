@@ -14,8 +14,8 @@ RUN git checkout stable
 # Step 5: Remove any existing node_modules and yarn.lock to avoid conflicts
 RUN rm -rf node_modules yarn.lock
 
-# Step 6: Install application dependencies using Yarn with caching
-RUN yarn install --frozen-lockfile --network-timeout 100000
+# Step 6: Install application dependencies using Yarn with the updated flags
+RUN yarn install --immutable --immutable-cache --network-timeout 100000
 
 # Step 7: Build the application
 RUN yarn build
@@ -30,7 +30,7 @@ WORKDIR /app
 COPY --from=build /app /app
 
 # Step 11: Install production dependencies only
-RUN yarn install --production --frozen-lockfile --network-timeout 100000 && \
+RUN yarn install --production --immutable --immutable-cache --network-timeout 100000 && \
     yarn cache clean
 
 # Step 12: Expose necessary ports
