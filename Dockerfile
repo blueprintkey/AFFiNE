@@ -16,10 +16,8 @@ RUN rm -rf node_modules package-lock.json
 
 
 # Step 6: Replace all "workspace:*" references in package.json with "1.0.0"
-RUN sed -i 's/"workspace:\*"/"1.0.0"/g' package.json && \
-    sed -i 's/"workspace: \*"/"1.0.0"/g' package.json && \
-    sed -i 's/"workspace:*/"1.0.0"/g' package.json
-
+RUN sed -i 's/"workspace:\*"/"1.0.0"/g' package.json 
+   
 # Step 7: Install application dependencies
 RUN npm install --legacy-peer-deps
 
