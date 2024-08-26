@@ -15,7 +15,7 @@ RUN git checkout stable
 COPY yarn.lock ./
 
 # Step 6: Install application dependencies using Yarn with the updated flags
-RUN yarn install --immutable --immutable-cache --network-timeout 100000
+RUN yarn install --network-timeout 100000
 
 # Step 7: Build the application
 RUN yarn build
