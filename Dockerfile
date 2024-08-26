@@ -11,8 +11,8 @@ RUN apk add --no-cache git python3 make g++ curl
 RUN git clone https://github.com/blueprintkey/AFFiNE.git .
 RUN git checkout stable
 
-# Step 5: Remove any existing node_modules and yarn.lock to avoid conflicts
-RUN rm -rf node_modules yarn.lock
+# Step 5: Copy the yarn.lock file to ensure it's used in the build
+COPY yarn.lock ./
 
 # Step 6: Install application dependencies using Yarn with the updated flags
 RUN yarn install --immutable --immutable-cache --network-timeout 100000
