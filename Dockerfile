@@ -15,7 +15,8 @@ RUN git checkout stable
 COPY package.json yarn.lock ./
 
 # Step 6: Install application dependencies using Yarn with network timeout and cleaning up afterwards
-RUN yarn install --network-timeout 100000 && \
+# Fix potential peer dependency issues by adding --legacy-peer-deps and --force options
+RUN yarn install --network-timeout 100000 --legacy-peer-deps --force && \
     yarn cache clean && \
     rm -rf /tmp/* /var/tmp/* /usr/share/man /var/cache/apk/*
 
@@ -36,7 +37,8 @@ WORKDIR /app
 COPY --from=build /app /app
 
 # Step 12: Install production dependencies using Yarn Workspaces Focus and clean up
-RUN yarn workspaces focus --production --all && \
+# Fix potential peer dependency issues by adding --legacy-peer-deps and --force options
+RUN yarn workspaces focus --production --all --legacy-peer-deps --force && \
     yarn cache clean && \
     rm -rf /tmp/* /var/tmp/* /usr/share/man /var/cache/apk/*
 
