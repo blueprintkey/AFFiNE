@@ -20,7 +20,7 @@ RUN yarn install --network-timeout 100000 && \
     rm -rf /tmp/* /var/tmp/* /usr/share/man /var/cache/apk/*
 
 # Step 7: Install missing devDependencies
-RUN yarn add @types/express @types/http-proxy-middleware @types/playwright__test --dev
+RUN yarn add @types/express @types/http-proxy-middleware @playwright/test --dev
 
 # Step 8: Set the BUILD_TYPE environment variable and build the application
 ENV BUILD_TYPE=stable
