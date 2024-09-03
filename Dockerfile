@@ -15,7 +15,7 @@ RUN git checkout stable
 COPY package.json yarn.lock ./
 
 # Step 6: Install application dependencies using Yarn with network timeout and cleaning up afterwards
-RUN yarn install --network-timeout 100000 && \
+RUN yarn install --network-timeout 100000 || cat /tmp/xfs-*/build.log && \
     yarn cache clean && \
     rm -rf /tmp/* /var/tmp/* /usr/share/man /var/cache/apk/*
 
@@ -24,7 +24,7 @@ RUN yarn add @types/express @types/http-proxy-middleware @playwright/test --dev
 
 # Step 8: Set the BUILD_TYPE environment variable and build the application
 ENV BUILD_TYPE=stable
-RUN yarn build
+RUN yarn build || cat /tmp/xfs-*/build.log
 
 # Step 9: Create a minimal production image
 FROM node:18-alpine AS production
@@ -36,7 +36,7 @@ WORKDIR /app
 COPY --from=build /app /app
 
 # Step 12: Install production dependencies using Yarn Workspaces Focus and clean up
-RUN yarn workspaces focus --production --all && \
+RUN yarn workspaces focus --production --all || cat /tmp/xfs-*/build.log && \
     yarn cache clean && \
     rm -rf /tmp/* /var/tmp/* /usr/share/man /var/cache/apk/*
 
