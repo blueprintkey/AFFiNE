@@ -14,8 +14,9 @@ RUN git checkout stable
 # Step 5: Copy the package.json and yarn.lock files
 COPY package.json yarn.lock ./
 
-# Step 6: Install application dependencies using Yarn with network timeout and cleaning up afterwards
-RUN yarn install --network-timeout 100000 || cat /tmp/xfs-*/build.log && \
+# Step 6: Install application dependencies including GraphQL-related packages
+RUN yarn add graphql apollo-server @graphql-tools/schema @graphql-tools/stitch && \
+    yarn install --network-timeout 100000 || cat /tmp/xfs-*/build.log && \
     yarn cache clean && \
     rm -rf /tmp/* /var/tmp/* /usr/share/man /var/cache/apk/*
 
